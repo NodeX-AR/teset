@@ -21,18 +21,26 @@ const wss = new WebSocket.Server({ server });
 wss.on('connection', (clientWs, req) => {
     console.log('Client connected');
     
-    const targetWs = new WebSocket('wss://z-x-25-x.hf.space');
+    const targetWs = new WebSocket('wss://z-x-25-x.hf.space', {
+        handshakeTimeout: 30000,
+        timeout: 60000  // 60 second timeout
+    });
     
-    // Add ping/pong to keep connection alive
-    let pingInterval = setInterval(() => {
+    // Send ping every 10 seconds to keep connection alive
+    const pingInterval = setInterval(() => {
         if (clientWs.readyState === WebSocket.OPEN) {
             clientWs.ping();
         }
         if (targetWs.readyState === WebSocket.OPEN) {
             targetWs.ping();
         }
-    }, 30000);
+    }, 10000);
     
+    targetWs.on('open', () => {
+        console.log('Connected to HF Space');
+    });
+    
+    // Forward messages both ways
     clientWs.on('message', (data) => {
         if (targetWs.readyState === WebSocket.OPEN) {
             targetWs.send(data);
@@ -53,6 +61,10 @@ wss.on('connection', (clientWs, req) => {
     targetWs.on('close', () => {
         clearInterval(pingInterval);
         if (clientWs.readyState === WebSocket.OPEN) clientWs.close();
+    });
+    
+    targetWs.on('error', (err) => {
+        console.log('HF error:', err.message);
     });
 });
 
