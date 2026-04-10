@@ -21,7 +21,7 @@ const wss = new WebSocket.Server({ server });
 wss.on('connection', (clientWs, req) => {
     console.log('Client connected');
     
-    const targetWs = new WebSocket('wss://z-x-25-x.hf.space/ws');
+    const targetWs = new WebSocket('wss://z-x-25-x.hf.space');
     
     // Add ping/pong to keep connection alive
     let pingInterval = setInterval(() => {
